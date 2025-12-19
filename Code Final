@@ -1,73 +1,133 @@
 const canvasWidth = 1000;
-const canvasHeight = 1000
+const canvasHeight = 1000;
 
-let speed = 5
-let objectx
-let objectVx = 0
+let speed = 10;
+let objectx;
+let objectVx = 0;
+let acceleration = 1;
+let friction = 0.95;
+let objecty;
+let objectVy = 0;
+let objcars
+
+const carSpeed = 5
 
 let movingLeft = false;
-        let movingRight = false; 
+let movingRight = false;
+let movingdown = false;
+let movingup = false;
 
 const objectSize = 50;
 
 function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
-  objectx = 250
-  
+  objectx = 250;
+  objecty = 150;
+  carx = random(1,3)
+  cary = 0
   canvas.elt.tabIndex = 1;
-            canvas.elt.focus();
- 
+  canvas.elt.focus();
 }
 
 function draw() {
-  background(220); 
+  background(50);
   road()
-  bear(objectx, 227.5)
- 
-  
- if(movingLeft && !movingRight){
-   objectVx = -speed
- }
-  else if(movingRight && !movingLeft) {
-    objectVx = speed
-  }
-  else{
-    objectVx = 0
-  }
- 
-  objectx += objectVx
-  
- objectx = constrain(objectx, objectSize / 2, canvasWidth - objectSize / 2);
-}  
+  bear(objectx, objecty);
 
-function bear(x,y){
-noStroke()
-  fill(255, 205, 40)
-  ellipse(x, y+32.5, 160, 190)
+  if (movingLeft) {
+    objectVx = max(objectVx - acceleration, -speed);
+  } else if (movingRight) {
+    objectVx = min(objectVx + acceleration, speed);
+  } else {
+    objectVx *= friction;
 
+    if (abs(objectVx) < 0.1) {
+      objectVx = 0;
+    }
+  }
+
+  if (movingup) {
+    objectVy = max(objectVy - acceleration, -speed);
+  } else if (movingdown) {
+    objectVy = min(objectVy + acceleration, speed);
+  } else {
+    objectVy *= friction;
+
+    if (abs(objectVy) < 0.1) {
+      objectVy = 0;
+    }
+  }
+
+  objectx += objectVx;
+  objecty += objectVy;
+
+  objectx = constrain(objectx, objectSize / 2, canvasWidth - objectSize / 2);
+  
 }
 
-function keyPressed(){
-  if(keyCode === LEFT_ARROW){
-    movingLeft=true
-  }
-  
-  else if(keyCode === RIGHT_ARROW){
-    movingRight=true
+function bear(x, y) {
+  noStroke();
+  fill(255, 205, 40);
+  ellipse(x, y + 32.5, 160, 190);
+
+  fill(200, 40, 40);
+  rect(x - 85, y - 37.5, 170, 80, 20);
+
+  fill(255, 205, 40);
+  ellipse(x, y - 87.5, 140, 130);
+
+  ellipse(x - 40, y - 137.5, 45, 45);
+  ellipse(x + 40, y - 137.5, 45, 45);
+
+  fill(0);
+  ellipse(x - 20, y - 97.5, 12, 16);
+  ellipse(x + 20, y - 97.5, 12, 16);
+
+  ellipse(x, y - 77.5, 25, 18);
+
+  noFill();
+  stroke(0);
+  strokeWeight(3);
+  arc(x, y - 67.5, 40, 30, 0, PI);
+
+  noStroke();
+  fill(255, 205, 40);
+  ellipse(x - 70, y + 12.5, 50, 90);
+  ellipse(x + 70, y + 12.5, 50, 90);
+  ellipse(x - 40, y + 112.5, 50, 90);
+  ellipse(x + 40, y + 112.5, 50, 90);
+  noFill();
+  stroke(0);
+  strokeWeight(3);
+  rect(x - 95, y - 157.5, 190, 315);
+  circle(x, y, 2);
+}
+
+function keyPressed() {
+  if (keyCode === LEFT_ARROW) {
+    movingLeft = true;
+  } else if (keyCode === RIGHT_ARROW) {
+    movingRight = true;
+  } else if (keyCode === UP_ARROW) {
+    movingup = true;
+  } else if (keyCode === DOWN_ARROW) {
+    movingdown = true;
   }
   return false;
-  
+}
+function keyReleased() {
+  if (keyCode === LEFT_ARROW) {
+    movingLeft = false;
+  } else if (keyCode === RIGHT_ARROW) {
+    movingRight = false;
+  } else if (keyCode === UP_ARROW) {
+    movingup = false;
+  } else if (keyCode === DOWN_ARROW) {
+    movingdown = false;
+  }
 }
 
-function keyReleased(){
-  if(keyCode === LEFT_ARROW){
-    movingLeft = false
-    
-  }
-  else if(keyCode === RIGHT_ARROW){
-    movingRight = false
-  }
-}
+
 
 function road(){
   fill(200)
