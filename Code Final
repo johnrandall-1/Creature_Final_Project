@@ -1,105 +1,72 @@
 const canvasWidth = 1000;
-const canvasHeight = 1000
+const canvasHeight = 1000;
 
-let speed = 5
-let objectx
-let objectVx = 0
-
-let movingLeft = false;
-        let movingRight = false; 
-
-const objectSize = 50;
 
 function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
-  objectx = 250
-  
-  canvas.elt.tabIndex = 1;
-            canvas.elt.focus();
- 
+  objectx = 250;
+  objecty = 150;
+
 }
 
 function draw() {
-  background(220);
-  bear(objectx, 227.5)
- if(movingLeft && !movingRight){
-   objectVx = -speed
- }
-  else if(movingRight && !movingLeft) {
-    objectVx = speed
-  }
-  else{
-    objectVx = 0
-  }
- 
-  objectx += objectVx
-  
- objectX = constrain(objectx, objectSize / 2, canvasWidth - objectSize / 2);
-}  
+  background(50);
+  road()
+  bear(objectx, objecty);
 
-function bear(x,y){
-noStroke()
-  fill(255, 205, 40)
-  ellipse(x, y+32.5, 160, 190)
+}
 
-  
-  fill(200, 40, 40)
-  rect(x-85, y-37.5, 170, 80, 20)
+function bear(x, y) {
+  noStroke();
+  fill(255, 205, 40);
+  ellipse(x, y + 32.5, 160, 190);
 
- 
-  fill(255, 205, 40)
-  ellipse(x, y-87.5, 140, 130)
+  fill(200, 40, 40);
+  rect(x - 85, y - 37.5, 170, 80, 20);
 
-  
-  ellipse(x-40, y-137.5, 45, 45)
-  ellipse(x+40, y-137.5, 45, 45)
+  fill(255, 205, 40);
+  ellipse(x, y - 87.5, 140, 130);
 
+  ellipse(x - 40, y - 137.5, 45, 45);
+  ellipse(x + 40, y - 137.5, 45, 45);
 
   fill(0);
-  ellipse(x-20, y-97.5, 12, 16)
-  ellipse(x+20, y-97.5, 12, 16)
+  ellipse(x - 20, y - 97.5, 12, 16);
+  ellipse(x + 20, y - 97.5, 12, 16);
+
+  ellipse(x, y - 77.5, 25, 18);
+
+  noFill();
+  stroke(0);
+  strokeWeight(3);
+  arc(x, y - 67.5, 40, 30, 0, PI);
+
+  noStroke();
+  fill(255, 205, 40);
+  ellipse(x - 70, y + 12.5, 50, 90);
+  ellipse(x + 70, y + 12.5, 50, 90);
+  ellipse(x - 40, y + 112.5, 50, 90);
+  ellipse(x + 40, y + 112.5, 50, 90);
+  noFill();
+  stroke(0);
+  strokeWeight(3);
+  rect(x - 95, y - 157.5, 190, 315);
+  circle(x, y, 2);
+}
 
 
-  ellipse(x, y-77.5, 25, 18)
 
-
-  noFill()
-  stroke(0)
-  strokeWeight(3)
-  arc(x, y-67.5, 40, 30, 0, PI)
-
-
+function road(){
+  fill(200)
+  rect(100,0,800,height)
+  for( let n = 0; n < width/60; n++ ) {
+    stripe(633,n*60)
+    stripe(366,n*60)
+  }
+  
+}
+function stripe(x,y){
+  fill(200,200,0)
   noStroke()
-  fill(255, 205, 40)
-  ellipse(x-70, y+12.5, 50, 90)
-  ellipse(x+70, y+12.5, 50, 90)
-  ellipse(x-40, y+112.5, 50, 90)
-  ellipse(x+40, y+112.5, 50, 90)
-  noFill()
-  stroke(0)
-  strokeWeight(3)
-  rect(x-95,y-157.5,190, 315)
-  circle(x,y,2)
-}
-
-function keyPressed(){
-  if(keyCode === LEFT_ARROW){
-    movingLeft=true
-  }
-  
-  else if(keyCode === RIGHT_ARROW){
-    movingRight=true
-  }
-  return false;
-  
-}
-
-function keyReleased(){
-  if(keyCode === LEFT_ARROW){
-    movingLeft = false
-    
-  }
-  else if(keyCode === RIGHT_ARROW){
-    movingRight = false
-  }
+  rect(x,y,10,30,2)
 }
