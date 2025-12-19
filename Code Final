@@ -1,101 +1,63 @@
 const canvasWidth = 1000;
 const canvasHeight = 1000;
 
-let speed = 10;
-let objectx;
-let objectVx = 0;
-let acceleration = 1;
+let objectPos, objectVel, objectAcc;
+let speedLimit = 20;
+let accelerationMag = 1;
 let friction = 0.95;
-let objecty;
-let objectVy = 0;
-let cars = []
-let lastSpawnTime = 0
-let player
+let cars = [];
+let lastSpawnTime = 0;
 
-
-let movingLeft = false;
-let movingRight = false;
-let movingdown = false;
-let movingup = false;
-
-const objectSize = 50;
+const objectSize = 200;
 
 function setup() {
- 
   const canvas = createCanvas(canvasWidth, canvasHeight);
-  objectx = 250;
-  objecty = 150;
 
   canvas.elt.tabIndex = 1;
   canvas.elt.focus();
+  objectPos = createVector(width / 2, 300);
+  objectVel = createVector(0, 0);
+  objectAcc = createVector(0, 0);
 }
 
 function draw() {
   background(50);
-  road()
-  bear(objectx, objecty);
-  
-let distance = dist(objectx, objecty, car.pos.x, car.pos.y);
+  road();
+  bear(objectPos.x, objectPos.y);
 
-if (distance < (objectSize / 2 + car.w / 2)) {
-  
-  let punch = p5.Vector.sub(createVector(objectx, objecty), Car.pos);
-  punch.normalize();
-  
+  let moveInput = createVector(0, 0);
+  if (keyIsDown(LEFT_ARROW)) moveInput.x -= 5;
+  if (keyIsDown(RIGHT_ARROW)) moveInput.x += 5;
+  if (keyIsDown(UP_ARROW)) moveInput.y -= 5;
+  if (keyIsDown(DOWN_ARROW)) moveInput.y += 5;
 
-  punch.mult(20); 
- 
-  objectVx = punch.x;
-  objectVy = punch.y;
-}
-  if (movingLeft) {
-    objectVx = max(objectVx - acceleration, -speed);
-  } else if (movingRight) {
-    objectVx = min(objectVx + acceleration, speed);
+  if (moveInput.mag() > 0) {
+    moveInput.normalize();
+    moveInput.mult(accelerationMag);
+    objectVel.add(moveInput);
   } else {
-    objectVx *= friction;
-
-    if (abs(objectVx) < 0.1) {
-      objectVx = 0;
-    }
+    objectVel.mult(friction);
   }
 
-  if (movingup) {
-    objectVy = max(objectVy - acceleration, -speed);
-  } else if (movingdown) {
-    objectVy = min(objectVy + acceleration, speed);
-  } else {
-    objectVy *= friction;
+  objectVel.limit(speedLimit);
 
-    if (abs(objectVy) < 0.1) {
-      objectVy = 0;
-    }
-  }
+  objectPos.add(objectVel);
 
-  objectx += objectVx;
-  objecty += objectVy;
+  objectPos.x = constrain(objectPos.x, objectSize / 2, width - objectSize / 2);
+  objectPos.y = constrain(objectPos.y, objectSize / 2, height - objectSize / 2);
 
-  objectx = constrain(objectx, objectSize / 2, canvasWidth - objectSize / 2);
-  
-
-if (millis() - lastSpawnTime > 1500) {
+  if (millis() - lastSpawnTime > 1500) {
     cars.push(new Car());
-    cars.push(new Car())
+    cars.push(new Car());
+
     lastSpawnTime = millis();
   }
-  player.update();
-  player.display();
 
-  
-for (let i = cars.length - 1; i >= 0; i--) {
+  for (let i = cars.length - 1; i >= 0; i--) {
     cars[i].update();
     cars[i].display();
-  
- if (player.hits(cars[i])) {
-      player.applyKnockback(cars[i]);
-    }
-   
-    if (cars[i].y > height + 50) {
+    handleCarHit(cars[i]);
+    if (cars[i].pos.y > height + 50) {
       cars.splice(i, 1);
     }
   }
@@ -135,85 +97,65 @@ function bear(x, y) {
   noFill();
   stroke(0);
   strokeWeight(3);
-  rect(x - 95, y - 157.5, 190, 315);
-  circle(x, y, 2);
 }
 
-function keyPressed() {
-  if (keyCode === LEFT_ARROW) {
-    movingLeft = true;
-  } else if (keyCode === RIGHT_ARROW) {
-    movingRight = true;
-  } else if (keyCode === UP_ARROW) {
-    movingup = true;
-  } else if (keyCode === DOWN_ARROW) {
-    movingdown = true;
-  }
-  return false;
-}
-function keyReleased() {
-  if (keyCode === LEFT_ARROW) {
-    movingLeft = false;
-  } else if (keyCode === RIGHT_ARROW) {
-    movingRight = false;
-  } else if (keyCode === UP_ARROW) {
-    movingup = false;
-  } else if (keyCode === DOWN_ARROW) {
-    movingdown = false;
+function road() {
+  fill(200);
+  rect(100, 0, 800, height);
+  for (let n = 0; n < width / 60; n++) {
+    stripe(633, n * 60);
+    stripe(366, n * 60);
   }
 }
-
-function road(){
-  fill(200)
-  rect(100,0,800,height)
-  for( let n = 0; n < width/60; n++ ) {
-    stripe(633,n*60)
-    stripe(366,n*60)
-  }
-  
-}
-function stripe(x,y){
-  fill(200,200,0)
-  noStroke()
-  rect(x,y,10,30,2)
+function stripe(x, y) {
+  fill(200, 200, 0);
+  noStroke();
+  rect(x, y, 10, 30, 2);
 }
 
 class Car {
   constructor() {
-    
     this.pos = createVector(random(100, width - 125), -50);
-    
-    
-    this.vel = createVector(0,6);
-    
-    
+    this.acc = createVector(0, 0);
+
+    this.vel = createVector(0, 10);
+
     this.w = 80;
     this.h = 140;
     this.color = color(random(100, 255), random(100, 255), random(100, 255));
   }
 
   update() {
-   
-    this.vel.add(this.acc); 
-    this.pos.add(this.vel); 
+    
+    this.vel.add(this.acc);
+    this.pos.add(this.vel);
   }
 
   display() {
-
     fill(0);
-    rectMode(CENTER)
-    rect(this.pos.x - 40, this.pos.y - 40, 20, 30); 
-    rect(this.pos.x + 40, this.pos.y - 40, 20, 30); 
+    rectMode(CENTER);
+    rect(this.pos.x - 40, this.pos.y - 40, 20, 30);
+    rect(this.pos.x + 40, this.pos.y - 40, 20, 30);
     rect(this.pos.x - 40, this.pos.y + 40, 20, 30);
     rect(this.pos.x + 40, this.pos.y + 40, 20, 30);
     fill(this.color);
-    
+
     rect(this.pos.x, this.pos.y, this.w, this.h, 5);
-    
 
     fill(40, 40, 40, 150);
     rect(this.pos.x, this.pos.y, this.w - 10, this.h / 3, 2);
-    rectMode(CORNER)
-   
+    rectMode(CORNER);
+  }
+}
+
+function handleCarHit(car) {
+  let distance = dist(objectPos.x, objectPos.y, car.pos.x, car.pos.y);
+
+  if (distance < objectSize / 2 + car.w / 2) {
+    let bounce = p5.Vector.sub(objectPos, car.pos);
+    bounce.normalize();
+    bounce.mult(25);
+
+    objectVel = bounce;
   }
 }
